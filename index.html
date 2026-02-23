@@ -18,6 +18,7 @@
       --text:#ffffff;
     }
     *{box-sizing:border-box}
+
     body{
       margin:0;
       height:100vh;
@@ -174,7 +175,7 @@
       50%{transform:translateY(-16px)}
     }
 
-    /* Batida (vibe) */
+    /* Batida */
     .beat svg{
       animation:
         grow 1.9s ease forwards,
@@ -275,6 +276,17 @@
       100%{opacity:0; transform: translate(-50%,-50%) translateY(260px) translateX(var(--dx)) rotate(calc(var(--r) + 240deg)) scale(1.05)}
     }
 
+    /* Botão som */
+    #soundBtn{
+      margin-top:10px;
+      padding:10px 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(255,255,255,.08);
+      color:white;
+      font-size:14px;
+    }
+
     @media (max-width:420px){
       .type{ font-size: 1rem; }
       svg{ filter: drop-shadow(0 0 22px rgba(255,46,106,.5)); }
@@ -338,22 +350,37 @@
     </div>
 
     <div class="type">Amanda, vai ficar tudo bem. 🌹✨</div>
-    <div class="sub">Toque na tela ✨ (liga o som também)</div>
+    <div class="sub">Toque na tela ✨ (ou clique no som)</div>
+
+    <button id="soundBtn" type="button">🔊 Ativar som</button>
   </div>
 
-  <!-- Música -->
-  <audio id="music" autoplay loop preload="auto">
-    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8a4b1a7b4.mp3?filename=romantic-background-112191.mp3" type="audio/mpeg">
+  <!-- Música do próprio repositório -->
+  <audio id="music" loop preload="auto" playsinline>
+    <source src="music.mp3" type="audio/mpeg">
   </audio>
 
   <script>
     const music = document.getElementById("music");
     const scene = document.getElementById("scene");
+    const soundBtn = document.getElementById("soundBtn");
 
-    // Em celular, autoplay pode falhar: toca no primeiro toque
-    function tryPlay(){ music.play().catch(()=>{}); }
-    document.addEventListener("click", tryPlay, {passive:true});
-    document.addEventListener("touchstart", tryPlay, {passive:true});
+    async function enableSound(){
+      try{
+        await music.play();
+        soundBtn.textContent = "🔊 Som ativado";
+        soundBtn.style.opacity = "0.75";
+      }catch(e){
+        soundBtn.textContent = "Toque de novo 🙂";
+      }
+    }
+
+    // Botão garante no celular
+    soundBtn.addEventListener("click", enableSound);
+
+    // Tenta tocar no primeiro toque/clique
+    document.addEventListener("touchstart", enableSound, {passive:true});
+    document.addEventListener("click", enableSound, {passive:true});
 
     function touchFX(clientX, clientY){
       const rect = scene.getBoundingClientRect();
@@ -380,7 +407,7 @@
         setTimeout(()=> mini.remove(), 700);
       }
 
-      // pétala extra caindo do toque
+      // pétala extra caindo
       const p = document.createElement("div");
       p.className = "tapPetal";
       const r = (Math.random()*60 - 30).toFixed(1) + "deg";
@@ -392,8 +419,8 @@
       scene.appendChild(p);
       setTimeout(()=> p.remove(), 1250);
 
-      // garante música
-      tryPlay();
+      // tenta ligar som também
+      enableSound();
     }
 
     scene.addEventListener("click", (e)=> touchFX(e.clientX, e.clientY));
